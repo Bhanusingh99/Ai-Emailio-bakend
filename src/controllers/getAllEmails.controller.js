@@ -1,11 +1,13 @@
 import Email from "../model/emailSchema-model.js";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-const genAI = new GoogleGenerativeAI("AIzaSyAoCzx0DlF6rmr7yvv0tt364Q7ktLrUh64");
 
 export const getAllEmails = async (req, res) => {
   try {
-    // Set the number of emails to fetch per page
-    const emails = await Email.find({});
+    // Get the limit from the query parameters or default to 50
+    const limit = parseInt(req.query.limit) || 50;
+
+    // Fetch the emails with a limit
+    const emails = await Email.find({}).limit(limit);
+
     res.status(200).json({ emails });
   } catch (error) {
     res.status(500).json({ message: "Error fetching emails", error });

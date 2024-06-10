@@ -1,26 +1,32 @@
+import UserAccessToken from "../model/accessToken.model.js"; // Assuming the correct path to your model file
 import Email from "../model/emailSchema-model.js";
 
-// Controller function to save or update emails in the database
 const saveOrUpdateEmails = async (req, res) => {
   try {
-    // Extract emails array from request body
-    const { emails } = req.body;
+    // Extract emails array and accessToken from request body
+    const { emails, accessToken } = req.body;
 
-    // Check if emails array is provided
-    if (!emails || !Array.isArray(emails)) {
+    // Check if emails array and accessToken are provided
+    if (!emails || !Array.isArray(emails) || !accessToken) {
       return res.status(400).json({ message: "Invalid request body" });
     }
 
-    // Delete all existing emails from the database
+    // Delete all existing emails and access token from the database
     await Email.deleteMany({});
+    await UserAccessToken.deleteMany({});
+
+    // Save access token to the database
+    const userToken = new UserAccessToken({ accessToken });
+    await userToken.save();
 
     // Iterate through each email in the array
     for (const email of emails) {
+      // Provide default value for body if missing
       if (!email.body) {
-        email.body = ""; // Provide default value for body if missing
+        email.body = "";
       }
 
-      // Assuming sender and recipient are properties of the email object
+      // Extract email properties
       const { sender, recipient, subject, snippet, body } = email;
 
       // Find existing email based on sender, recipient, and subject
@@ -29,8 +35,6 @@ const saveOrUpdateEmails = async (req, res) => {
         { body }, // Update the body of the email
         { upsert: true, new: true } // Create new document if not found, and return updated document
       );
-
-      // Log the updated email
     }
 
     return res
