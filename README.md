@@ -37,6 +37,7 @@ Before you begin, ensure you have met the following requirements:
    PORT=4000
 
    make sure to add password in mongodb url
+   
    MONGODB_URI=
 
 5. **start the server**
